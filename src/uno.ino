@@ -1,4 +1,7 @@
 #include <IRremote.h>
+//#include <IRsend.h>
+//#include <codes.h>
+//#include <hvac.h>
   
 #define SEND_RATE_KHZ 38 // Assume 38 KHz
 #define CHIGO_HEADER              "FF00FF00"
@@ -94,7 +97,8 @@ enum Speed {
   Slow = 0, Medium, Fast, Smart
 };
 
-int RECV_PIN = 10; 
+int RECV_PIN = 10;
+int BUILTIN_LED = 13;
 
 float armazenavalor;
 bool state = false;
@@ -110,6 +114,7 @@ Mode stateMode = Auto;
 //decode_results results;
 
 //IRsend irsend(IR_SEND_PIN);
+
 
 void setup()  
 {    
@@ -213,9 +218,11 @@ void loop()
 {  
   delay(5000); 
 
+  digitalWrite(BUILTIN_LED, HIGH);
+
   Serial.println("Loop init");
   if (!state) {
-    turnOn();
+    turnOn();   
   }
   
 
@@ -241,7 +248,8 @@ void loop()
     irrecv.resume(); //Le o próximo valor  
   }*/
 
-  delay(1000);  
+  delay(1000);
+  digitalWrite(BUILTIN_LED, LOW);
 }
 
 void addTemperatureAndModeToData(int temp, String mode, List& data) {
