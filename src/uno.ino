@@ -110,8 +110,8 @@ bool turbo = false;
 int stateTemperature = 23;
 Mode stateMode = Auto;
 
-//IRrecv irrecv(RECV_PIN);  
-//decode_results results;
+IRrecv irrecv(RECV_PIN);  
+decode_results results;
 
 //IRsend irsend(IR_SEND_PIN);
 
@@ -121,9 +121,11 @@ void setup()
   pinMode(BUILTIN_LED, OUTPUT); 
   digitalWrite(BUILTIN_LED, LOW);  
   Serial.begin(9600);  
-  //irrecv.enableIRIn(); // Inicializa o receptor IR  
+  
+  //irrecv.enableIRIn(); // Inicializa o receptor IR 
+  //irrecv.blink13(true); 
+  
   //irsend.begin();
-
   //Serial.println(F("Send IR signals at pin " STR(IR_SEND_PIN)));
 
   IrSender.begin(IR_SEND_PIN);
@@ -138,7 +140,7 @@ void setup()
 void turnOn() {
   state = true;
   sendCode(CHIGO_CMD_POWER, getPowerAsParameter(state));
-  Serial.println("turned ON!");
+  //Serial.println("turned ON!");
 }
 
 void turnOff() {
@@ -195,6 +197,18 @@ void dump(decode_results *results) {
 }
 
 
+void printData(List data) {
+  Serial.print("data[");
+  const size_t size = sizeof(data.data) / sizeof(data.data[0]);
+  for (int i = 0; i < size; i++) {
+        Serial.print(data.data[i]);
+        Serial.print(", ");
+  }
+  Serial.print("]: ");
+  Serial.println("sizeOfData: ");
+  Serial.print(size);
+}
+
 void sendCode(String cmd, char* param) {
   List data;
 
@@ -211,20 +225,22 @@ void sendCode(String cmd, char* param) {
   addFooterToData(data);
   
   IrSender.sendRaw(data.data, data.counter, SEND_RATE_KHZ);
-  Serial.println("Sent raw!");
+  //Serial.print(data.data);
+  printData(data);
+  //Serial.println("Sent raw!");
 }
 
 void loop()  
 {  
-  delay(5000); 
+  delay(4000); 
 
-  digitalWrite(BUILTIN_LED, HIGH);
-
-  Serial.println("Loop init");
+  //Serial.println("Loop init");
   if (!state) {
-    turnOn();   
+    digitalWrite(BUILTIN_LED, HIGH);
+    turnOn();
+    delay(1000);
+    digitalWrite(BUILTIN_LED, LOW);
   }
-  
 
   /*if (irrecv.decode(&results) )  //&& results.value != 0
   { 
@@ -248,8 +264,6 @@ void loop()
     irrecv.resume(); //Le o próximo valor  
   }*/
 
-  delay(1000);
-  digitalWrite(BUILTIN_LED, LOW);
 }
 
 void addTemperatureAndModeToData(int temp, String mode, List& data) {
@@ -380,7 +394,7 @@ void addBytesToData(String bytes, size_t count, List& data) {
 
 void addHeaderToData(List& data) {
   addToList(data, 6234);
-  addToList(data, 7302);
+  addToList(data, 7392); //7302
 }
 
 void addFooterToData(List& data) {
